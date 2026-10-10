@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Indoor vs Outdoor</title>
+		<meta name="description" content="Indoor and outdoor PM2.5, side by side." />
+		<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" />
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body>
+		<div class="screen">
+			<header class="top">
+				<div class="brand">
+					<img class="logo" src="logo.svg" alt="TAFCO" />
+				</div>
+				<div class="status">
+					<span class="live"><span class="live-dot"></span>Live</span>
+					<div class="clock">
+						<strong id="clock-time">--:--</strong>
+						<span id="clock-date"></span>
+					</div>
+				</div>
+			</header>
+
+			<section class="intro">
+				<p class="eyebrow"><span class="sq"></span>Indoor vs outdoor</p>
+				<h1>Cleaner air starts indoors.</h1>
+			</section>
+
+			<main class="compare">
+				<article class="side" id="indoor">
+					<p class="side-label"><span class="sq"></span>Indoor air</p>
+					<p class="hero"><span class="hero-value" id="in-pm25">–</span><span class="hero-unit">PM2.5<br />µg/m³</span></p>
+					<span class="badge" id="in-badge">–</span>
+					<div class="subs">
+						<div><span class="sub-k">PM10</span><span class="sub-v"><b id="in-pm10">–</b> µg/m³</span></div>
+						<div><span class="sub-k">AQI</span><span class="sub-v"><b id="in-aqi">–</b></span></div>
+					</div>
+				</article>
+
+				<div class="filter" aria-hidden="true">
+					<canvas id="flow"></canvas>
+				</div>
+				<div class="delta">
+					<strong id="delta">–</strong>
+					<span>PM2.5 indoors</span>
+				</div>
+
+				<article class="side" id="outdoor">
+					<p class="side-label"><span class="sq"></span>Outdoor air</p>
+					<p class="hero"><span class="hero-value" id="out-pm25">–</span><span class="hero-unit">PM2.5<br />µg/m³</span></p>
+					<span class="badge" id="out-badge">Loading</span>
+					<div class="subs">
+						<div><span class="sub-k">PM10</span><span class="sub-v"><b id="out-pm10">–</b> µg/m³</span></div>
+						<div><span class="sub-k">AQI</span><span class="sub-v"><b id="out-aqi">–</b></span></div>
+					</div>
+				</article>
+			</main>
+
+			<footer class="foot">
+				<span><span class="dot"></span>Sensor <b id="sensor-name"></b> + city outdoor feed · <span id="feed-state">Connecting</span></span>
+				<span>Updated <b id="updated">--:--:--</b> · Outdoor data refreshed <span id="ago">–</span></span>
+			</footer>
+		</div>
+
+		<script src="config.js"></script>
+		<script src="app.js"></script>
+	</body>
+</html>

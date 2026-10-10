@@ -7,14 +7,22 @@ window.AIR_CONFIG = {
 	},
 	// Where outdoor air is measured (live data from Open-Meteo).
 	outdoorPlace: {
-		name: "Ahmedabad",
-		latitude: 23.0225,
-		longitude: 72.5714,
+		name: "ISRO SAC, Ahmedabad",
+		latitude: 23.0300,
+		longitude: 72.5150,
+	},
+	// Real monitoring station from WAQI (aqicn.org). Get a free token at
+	// https://aqicn.org/data-platform/token and paste it below.
+	// id: "geo:LAT;LON" picks the nearest station, or "@1234" a specific one.
+	// Leave token empty to use the Open-Meteo model for outdoorPlace instead.
+	station: {
+		token: "",
+		id: "geo:23.0300;72.5150",
 	},
 	sensorName: "TAFCO IAQ-01",
 
 	// Fetch new outdoor data every N minutes.
-	autoRefreshMinutes: 15,
+	autoRefreshMinutes: 5,
 
 	// Indoor sensor is not connected yet: the screen loops through these
 	// static readings (µg/m³), moving to the next one every N seconds.

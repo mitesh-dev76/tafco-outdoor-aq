@@ -8,8 +8,8 @@
 		<link rel="icon" type="image/svg+xml" href="favicon.svg" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" />
-		<link rel="stylesheet" href="styles.css" />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600&display=swap" />
+		<link rel="stylesheet" href="styles.css?v=1791644547" />
 	</head>
 	<body>
 		<div class="screen">
@@ -27,8 +27,7 @@
 			</header>
 
 			<section class="intro">
-				<p class="eyebrow"><span class="sq"></span>Indoor vs outdoor</p>
-				<h1>Cleaner air starts indoors.</h1>
+				<h1>Indoor Air Quality Vs Ambient Air Quality</h1>
 			</section>
 
 			<main class="compare">
@@ -38,7 +37,7 @@
 					<span class="badge" id="in-badge">–</span>
 					<div class="subs">
 						<div><span class="sub-k">PM10</span><span class="sub-v"><b id="in-pm10">–</b> µg/m³</span></div>
-						<div><span class="sub-k">AQI</span><span class="sub-v"><b id="in-aqi">–</b></span></div>
+						<div><span class="sub-k">AQI (CPCB)</span><span class="sub-v"><b id="in-aqi">–</b></span></div>
 					</div>
 				</article>
 
@@ -56,18 +55,18 @@
 					<span class="badge" id="out-badge">Loading</span>
 					<div class="subs">
 						<div><span class="sub-k">PM10</span><span class="sub-v"><b id="out-pm10">–</b> µg/m³</span></div>
-						<div><span class="sub-k">AQI</span><span class="sub-v"><b id="out-aqi">–</b></span></div>
+						<div><span class="sub-k">AQI (CPCB)</span><span class="sub-v"><b id="out-aqi">–</b></span></div>
 					</div>
 				</article>
 			</main>
 
 			<footer class="foot">
-				<span><span class="dot"></span>Sensor <b id="sensor-name"></b> + city outdoor feed · <span id="feed-state">Connecting</span></span>
+				<span><span class="dot"></span><b>TAFCO IAQ monitor AirPALD 007</b> - Ambient air quality monitoring station (CPCB - ISRO SAC, Ahmedabad)</span>
 				<span>Updated <b id="updated">--:--:--</b> · Outdoor data refreshed <span id="ago">–</span></span>
 			</footer>
 		</div>
 
-		<script src="config.js"></script>
-		<script src="app.js"></script>
+		<script src="config.js?v=1791644547"></script>
+		<script src="app.js?v=1791644547"></script>
 	</body>
 </html>

@@ -4,28 +4,40 @@
 	const CONFIG = window.AIR_CONFIG;
 	const API = "https://air-quality-api.open-meteo.com/v1/air-quality";
 
-	// US EPA PM2.5 bands (µg/m³) with matching AQI breakpoints.
-	const PM25_BANDS = [
-		{ max: 12, aqi: [0, 50], label: "Good", color: "#22c55e", ink: "#0b0b0c" },
-		{ max: 35.4, aqi: [51, 100], label: "Moderate", color: "#facc15", ink: "#0b0b0c" },
-		{ max: 55.4, aqi: [101, 150], label: "Sensitive", color: "#fb923c", ink: "#0b0b0c" },
-		{ max: 150.4, aqi: [151, 200], label: "Unhealthy", color: "#ff1f1f", ink: "#0b0b0c" },
-		{ max: 250.4, aqi: [201, 300], label: "Very unhealthy", color: "#a855f7", ink: "#ffffff" },
-		{ max: 500.4, aqi: [301, 500], label: "Hazardous", color: "#7f1d1d", ink: "#ffffff" },
+	// India CPCB National AQI. Concentration breakpoints (µg/m³) per category;
+	// the same index as CATEGORIES. Each category maps to an AQI range.
+	const CATEGORIES = [
+		{ aqi: [0, 50], label: "Good", color: "#00b050", ink: "#0b0b0c" },
+		{ aqi: [51, 100], label: "Satisfactory", color: "#92d050", ink: "#0b0b0c" },
+		{ aqi: [101, 200], label: "Moderate", color: "#ffff00", ink: "#0b0b0c" },
+		{ aqi: [201, 300], label: "Poor", color: "#ff9900", ink: "#0b0b0c" },
+		{ aqi: [301, 400], label: "Very poor", color: "#ff0000", ink: "#0b0b0c" },
+		{ aqi: [401, 500], label: "Severe", color: "#c00000", ink: "#ffffff" },
 	];
+	const CPCB = {
+		pm2_5: [[0, 30], [31, 60], [61, 90], [91, 120], [121, 250], [251, 380]],
+		pm10: [[0, 50], [51, 100], [101, 250], [251, 350], [351, 430], [431, 510]],
+	};
 
 	const $ = (id) => document.getElementById(id);
 	const root = document.documentElement;
 	const state = { outdoor: null, fetchedAt: null, indoorIndex: 0, indoor: null };
 
 	// ---------- helpers ----------
-	const bandFor = (pm) => PM25_BANDS.find((b) => pm <= b.max) ?? PM25_BANDS[PM25_BANDS.length - 1];
-	function aqiFromPm25(pm) {
-		const i = PM25_BANDS.indexOf(bandFor(pm));
-		const lo = i === 0 ? 0 : PM25_BANDS[i - 1].max + 0.1;
-		const b = PM25_BANDS[i];
-		return Math.round(b.aqi[0] + ((b.aqi[1] - b.aqi[0]) * (Math.min(pm, b.max) - lo)) / (b.max - lo));
+	function catIndex(key, v) {
+		const i = CPCB[key].findIndex(([, hi]) => v < hi + 1);
+		return i === -1 ? CATEGORIES.length - 1 : i;
 	}
+	// Category of a PM2.5 reading drives the label and colours.
+	const bandFor = (pm25) => CATEGORIES[catIndex("pm2_5", pm25)];
+	function subIndex(key, v) {
+		const i = catIndex(key, v);
+		const [blo, bhi] = CPCB[key][i];
+		const [ilo, ihi] = CATEGORIES[i].aqi;
+		return Math.min(500, ilo + ((ihi - ilo) * (Math.min(v, bhi) - blo)) / (bhi - blo));
+	}
+	// CPCB AQI = highest sub-index of the pollutants measured.
+	const cpcbAqi = (r) => Math.round(Math.max(subIndex("pm2_5", r.pm2_5), r.pm10 != null ? subIndex("pm10", r.pm10) : 0));
 	const fmt = (v) => (v == null || Number.isNaN(v) ? "–" : v >= 100 ? Math.round(v).toString() : v.toFixed(v >= 10 ? 0 : 1));
 	const pad = (n) => String(n).padStart(2, "0");
 
@@ -51,7 +63,7 @@
 		root.style.setProperty("--in-ink", band.ink);
 		$("in-pm25").textContent = fmt(r.pm2_5);
 		$("in-pm10").textContent = fmt(r.pm10);
-		$("in-aqi").textContent = aqiFromPm25(r.pm2_5);
+		$("in-aqi").textContent = cpcbAqi(r);
 		$("in-badge").textContent = band.label;
 		const now = new Date();
 		$("updated").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
@@ -65,7 +77,7 @@
 		root.style.setProperty("--out-ink", band.ink);
 		$("out-pm25").textContent = fmt(o.pm2_5);
 		$("out-pm10").textContent = fmt(o.pm10);
-		$("out-aqi").textContent = o.us_aqi != null ? Math.round(o.us_aqi) : aqiFromPm25(o.pm2_5);
+		$("out-aqi").textContent = cpcbAqi(o);
 		$("out-badge").textContent = band.label;
 		renderDelta();
 	}
@@ -88,22 +100,58 @@
 	}
 
 	// ---------- data ----------
-	async function loadOutdoor() {
+	// WAQI reports pollutants as US AQI sub-indices; convert back to µg/m³.
+	const AQI_STEPS = [0, 50, 100, 150, 200, 300, 500];
+	const CONC_STEPS = {
+		pm25: [0, 12, 35.4, 55.4, 150.4, 250.4, 500.4],
+		pm10: [0, 54, 154, 254, 354, 424, 604],
+	};
+	function concFromAqi(aqi, key) {
+		const c = CONC_STEPS[key];
+		const i = Math.max(1, AQI_STEPS.findIndex((x) => aqi <= x));
+		if (i === -1 || aqi > 500) return c[c.length - 1];
+		const [a0, a1, c0, c1] = [AQI_STEPS[i - 1], AQI_STEPS[i], c[i - 1], c[i]];
+		return c0 + ((aqi - a0) * (c1 - c0)) / (a1 - a0);
+	}
+
+	// A real monitoring station via WAQI (aqicn.org), when a token is set.
+	async function fetchStation() {
+		const s = CONFIG.station;
+		const res = await fetch(`https://api.waqi.info/feed/${s.id}/?token=${encodeURIComponent(s.token)}`);
+		const json = await res.json();
+		if (json.status !== "ok" || !json.data.iaqi?.pm25) throw new Error(`Station feed: ${json.data ?? "no PM2.5"}`);
+		const d = json.data;
+		return {
+			pm2_5: concFromAqi(d.iaqi.pm25.v, "pm25"),
+			pm10: d.iaqi.pm10 ? concFromAqi(d.iaqi.pm10.v, "pm10") : null,
+			source: d.city?.name ?? "Station",
+			measuredAt: d.time?.s,
+		};
+	}
+
+	// Modelled data from Open-Meteo (CAMS), used as fallback.
+	async function fetchModel() {
 		const p = CONFIG.outdoorPlace;
-		const url = `${API}?latitude=${p.latitude}&longitude=${p.longitude}&current=us_aqi,pm2_5,pm10&timezone=auto`;
+		const res = await fetch(`${API}?latitude=${p.latitude}&longitude=${p.longitude}&current=pm2_5,pm10&timezone=auto`);
+		if (!res.ok) throw new Error(`Air quality service returned ${res.status}`);
+		const json = await res.json();
+		return { ...json.current, source: "Open-Meteo model" };
+	}
+
+	async function loadOutdoor() {
 		try {
-			const res = await fetch(url);
-			if (!res.ok) throw new Error(`Air quality service returned ${res.status}`);
-			const json = await res.json();
-			state.outdoor = json.current;
+			let data;
+			if (CONFIG.station?.token) {
+				try { data = await fetchStation(); } catch (err) { console.warn(err); }
+			}
+			data ??= await fetchModel();
+			state.outdoor = data;
 			state.fetchedAt = new Date();
-			$("feed-state").textContent = "Online";
 			document.querySelector(".live").classList.remove("off");
 			renderOutdoor();
 			renderIndoor();
 		} catch (err) {
 			console.error(err);
-			$("feed-state").textContent = "Offline";
 			document.querySelector(".live").classList.add("off");
 			if (!state.outdoor) $("out-badge").textContent = "Offline";
 		}
@@ -164,7 +212,6 @@
 	})();
 
 	// ---------- start ----------
-	$("sensor-name").textContent = CONFIG.sensorName;
 	tickClock();
 	setInterval(tickClock, 1000);
 	renderIndoor();

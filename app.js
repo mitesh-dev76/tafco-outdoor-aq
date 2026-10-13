@@ -100,6 +100,27 @@
 	}
 
 	// ---------- data ----------
+	// Static outdoor cycle: rise through outdoorSamples, then fall back, one
+	// step every outdoorIntervalSeconds. A midpoint is inserted between listed
+	// values and each end is held one extra step, so 10 values fill 60 s each way.
+	const OUT_STEPS = (() => {
+		const v = CONFIG.outdoorSamples;
+		const up = v.flatMap((x, i) => (i ? [(v[i - 1] + x) / 2, x] : [x]));
+		return [...up, v[v.length - 1], ...up.slice().reverse(), v[0]];
+	})();
+	let outStep = 0;
+
+	function loadOutdoor() {
+		const pm2_5 = OUT_STEPS[outStep];
+		outStep = (outStep + 1) % OUT_STEPS.length;
+		state.outdoor = { pm2_5, pm10: pm2_5 * CONFIG.outdoorPm10Ratio, source: CONFIG.outdoorPlace.name };
+		state.fetchedAt = new Date();
+		document.querySelector(".live").classList.remove("off");
+		renderOutdoor();
+		renderIndoor();
+	}
+
+	/* Real outdoor data (WAQI station / Open-Meteo model), disabled for now.
 	// WAQI reports pollutants as US AQI sub-indices; convert back to µg/m³.
 	const AQI_STEPS = [0, 50, 100, 150, 200, 300, 500];
 	const CONC_STEPS = {
@@ -156,6 +177,8 @@
 			if (!state.outdoor) $("out-badge").textContent = "Offline";
 		}
 	}
+
+	*/
 
 	// ---------- particles flowing through the filter ----------
 	const Flow = (() => {
@@ -220,5 +243,5 @@
 		state.indoorIndex = (state.indoorIndex + 1) % CONFIG.indoorSamples.length;
 		renderIndoor();
 	}, CONFIG.indoorIntervalSeconds * 1000);
-	if (CONFIG.autoRefreshMinutes > 0) setInterval(loadOutdoor, CONFIG.autoRefreshMinutes * 60 * 1000);
+	setInterval(loadOutdoor, CONFIG.outdoorIntervalSeconds * 1000);
 })();

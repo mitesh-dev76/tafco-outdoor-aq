@@ -7,9 +7,9 @@ window.AIR_CONFIG = {
 	},
 	// Where outdoor air is measured (live data from Open-Meteo).
 	outdoorPlace: {
-		name: "ISRO SAC, Ahmedabad",
-		latitude: 23.0300,
-		longitude: 72.5150,
+		name: "Anand Vihar, Delhi",
+		latitude: 28.6468,
+		longitude: 77.3160,
 	},
 	// Real monitoring station from WAQI (aqicn.org). Get a free token at
 	// https://aqicn.org/data-platform/token and paste it below.
@@ -17,12 +17,19 @@ window.AIR_CONFIG = {
 	// Leave token empty to use the Open-Meteo model for outdoorPlace instead.
 	station: {
 		token: "",
-		id: "geo:23.0300;72.5150",
+		id: "geo:28.6468;77.3160",
 	},
 	sensorName: "TAFCO IAQ-01",
 
-	// Fetch new outdoor data every N minutes.
+	// Fetch new outdoor data every N minutes (real data is disabled in app.js).
 	autoRefreshMinutes: 5,
+
+	// Static outdoor PM2.5 (µg/m³): climbs through these values over 60 s,
+	// then back down over the next 60 s, changing every N seconds.
+	// PM10 is PM2.5 × outdoorPm10Ratio. Category and AQI follow CPCB.
+	outdoorIntervalSeconds: 3,
+	outdoorSamples: [25, 56, 74, 89, 138, 170, 203, 255, 314, 408],
+	outdoorPm10Ratio: 1.7,
 
 	// Indoor sensor is not connected yet: the screen loops through these
 	// static readings (µg/m³), moving to the next one every N seconds.

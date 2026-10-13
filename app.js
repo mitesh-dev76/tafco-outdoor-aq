@@ -63,7 +63,6 @@
 		root.style.setProperty("--in-ink", band.ink);
 		$("in-pm25").textContent = fmt(r.pm2_5);
 		$("in-pm10").textContent = fmt(r.pm10);
-		$("in-aqi").textContent = cpcbAqi(r);
 		$("in-badge").textContent = band.label;
 		const now = new Date();
 		$("updated").textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;

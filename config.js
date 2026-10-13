@@ -7,9 +7,9 @@ window.AIR_CONFIG = {
 	},
 	// Where outdoor air is measured (live data from Open-Meteo).
 	outdoorPlace: {
-		name: "Anand Vihar, Delhi",
-		latitude: 28.6468,
-		longitude: 77.3160,
+		name: "Aya Nagar (IMD), Delhi",
+		latitude: 28.4707,
+		longitude: 77.1099,
 	},
 	// Real monitoring station from WAQI (aqicn.org). Get a free token at
 	// https://aqicn.org/data-platform/token and paste it below.
@@ -17,7 +17,7 @@ window.AIR_CONFIG = {
 	// Leave token empty to use the Open-Meteo model for outdoorPlace instead.
 	station: {
 		token: "",
-		id: "geo:28.6468;77.3160",
+		id: "geo:28.4707;77.1099",
 	},
 	sensorName: "TAFCO IAQ-01",
 
